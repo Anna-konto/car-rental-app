@@ -1,7 +1,6 @@
 services:
   - type: web
     name: car-rental-app
-    env: java
     region: frankfurt
     plan: free
     buildCommand: mvn clean package -DskipTests
