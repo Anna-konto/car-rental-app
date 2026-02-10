@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dodaj samochód</title>
+</head>
+<body>
+<div th:if="${error}" style="color:red; margin-bottom:10px;">
+    <b th:text="${error}"></b>
+</div>
+
+<nav style="margin-bottom:15px;">
+    <a href="/panel/cars">🚗 Samochody</a> |
+    <a href="/panel/customers">👤 Klienci</a> |
+    <a href="/panel/rentals">📄 Wypożyczenia</a>
+</nav>
+
+<hr>
+
+<h1>➕ Dodaj samochód</h1>
+
+<form th:action="@{/panel/cars/add}"
+      th:object="${car}"
+      method="post">
+
+    <label>Marka:</label><br>
+    <input type="text" th:field="*{brand}" required><br><br>
+
+    <label>Model:</label><br>
+    <input type="text" th:field="*{model}" required><br><br>
+
+    <label>Numer rejestracyjny:</label><br>
+    <input type="text" th:field="*{plateNumber}" required><br><br>
+
+    <label>Rok produkcji:</label><br>
+    <input type="number" th:field="*{year}" required><br><br>
+    <label>VIN:</label><br>
+    <input type="text"
+           th:field="*{vin}"
+           maxlength="17"
+           placeholder="17-znakowy numer VIN"
+           required>
+    <br><br>
+
+    <label>Badanie techniczne do:</label><br>
+    <input type="date" th:field="*{technicalInspectionValidUntil}"><br><br>
+
+    <label>Ubezpieczenie do:</label><br>
+    <input type="date" th:field="*{insuranceValidUntil}"><br><br>
+
+    <button type="submit">💾 Zapisz</button>
+</form>
+
+<br>
+<a href="/panel/cars">⬅ Powrót do listy samochodów</a>
+
+</body>
+</html>

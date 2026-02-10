@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Archiwum samochodów</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+        }
+        th {
+            background: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+
+<nav style="margin-bottom:15px;">
+    <a href="/panel/cars">🚗 Aktywne samochody</a> |
+    <a href="/panel/cars/archived">📦 Archiwum</a> |
+    <a href="/panel/customers">👤 Klienci</a> |
+    <a href="/panel/rentals">📄 Wypożyczenia</a>
+</nav>
+
+<h1>📦 Samochody zarchiwizowane</h1>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Marka</th>
+        <th>Model</th>
+        <th>Rejestracja</th>
+        <th>Status</th>
+        <th>Szczegóły</th>
+        <th>Akcja</th>
+
+    </tr>
+
+    <tr th:each="car : ${cars}">
+        <td th:text="${car.id}"></td>
+        <td th:text="${car.brand}"></td>
+        <td th:text="${car.model}"></td>
+        <td th:text="${car.plateNumber}"></td>
+        <td th:text="${car.status}"></td>
+        <td>
+            <a th:href="@{'/panel/cars/' + ${car.id}}">🔍 Podgląd</a>
+        </td>
+        <td>
+            <form th:action="@{'/panel/cars/' + ${car.id} + '/restore'}"
+                  method="post"
+                  style="display:inline;">
+                <button type="submit"
+                        onclick="return confirm('Przywrócić samochód do aktywnych?')">
+                    ♻ Przywróć
+                </button>
+            </form>
+        </td>
+
+    </tr>
+</table>
+
+<br>
+<a href="/panel/cars">⬅ Powrót do aktywnych samochodów</a>
+
+</body>
+</html>

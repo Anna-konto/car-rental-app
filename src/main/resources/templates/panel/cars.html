@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<nav style="margin-bottom:15px;">
+    <a href="/panel/cars">🚗 Samochody</a> |
+    <a href="/panel/customers">👤 Klienci</a> |
+    <a href="/panel/rentals">📄 Wypożyczenia</a>
+</nav>
+<hr>
+
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel – Samochody</title>
+
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: left;
+        }
+        .AVAILABLE {
+            background-color: #e6ffe6;
+        }
+        .RENTED {
+            background-color: #fff3cd;
+        }
+        .OUT_OF_SERVICE {
+            background-color: #ffe6e6;
+        }
+    </style>
+
+    <a href="/panel/cars/add" class="button">
+        ➕ Dodaj samochód
+    </a>
+
+    <br><br>
+
+</head>
+<body>
+
+<h1>🚗 Samochody</h1>
+<form method="get" action="/panel/cars" style="margin-bottom:15px;">
+    <label>Szukaj po rejestracji:</label>
+    <input type="text" name="plate" th:value="${plate}">
+    <button type="submit">🔍 Szukaj</button>
+    <a href="/panel/cars">Wyczyść</a>
+</form>
+<div style="margin-bottom:15px;">
+    <strong>Filtruj:</strong>
+
+    <a href="/panel/cars">Wszystkie</a> |
+
+    <a th:href="@{/panel/cars(status='AVAILABLE', plate=${plate})}">
+        ✅ Dostępne
+    </a> |
+
+    <a th:href="@{/panel/cars(status='RENTED', plate=${plate})}">
+        🚗 Wypożyczone
+    </a> |
+
+    <a th:href="@{/panel/cars(status='OUT_OF_SERVICE', plate=${plate})}">
+        ⛔ Wyłączone
+    </a>
+</div>
+
+<hr>
+
+<!-- 📋 TABELA -->
+<h2>Lista samochodów</h2>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Marka</th>
+        <th>Model</th>
+        <th>Rejestracja</th>
+        <th>Status</th>
+        <th>Przegląd</th>
+        <th>Ubezpieczenie</th>
+        <th>Alerty</th>
+        <th>Akcja</th>
+        <th>Akcje</th>
+
+    </tr>
+
+      <tr th:each="car : ${cars}"
+        th:class="${car.status}">
+
+        <td>
+            <a th:href="@{'/panel/cars/' + ${car.id}}"
+               th:text="${car.id}">
+            </a>
+        </td>
+
+        <td>
+            <a th:href="@{'/panel/cars/' + ${car.id}}"
+               th:text="${car.brand}">
+            </a>
+        </td>
+
+        <td th:text="${car.model}"></td>
+    <td>
+        <a th:href="@{'/panel/cars/' + ${car.id}}"
+           th:text="${car.plateNumber}"></a>
+    </td>
+
+    <td th:text="${car.status}"></td>
+        <td th:text="${car.technicalInspectionValidUntil}"></td>
+        <td th:text="${car.insuranceValidUntil}"></td>
+    <td>
+        <div th:if="${car.insuranceExpired}" style="color:red;font-weight:bold;">
+            ❌ Ubezpieczenie nieważne
+        </div>
+        <div th:if="${car.insuranceExpiringSoon}" style="color:orange;">
+            ⚠️ Ubezpieczenie kończy się
+        </div>
+
+        <div th:if="${car.inspectionExpired}" style="color:red;font-weight:bold;">
+            ❌ Badanie techniczne nieważne
+        </div>
+        <div th:if="${car.inspectionExpiringSoon}" style="color:orange;">
+            ⚠️ Badanie techniczne kończy się
+        </div>
+    </td>
+
+        <td>
+            <a th:if="${car.canBeRented()}"
+               th:href="@{'/panel/rentals/add?carId=' + ${car.id}}">
+                🚗 Wypożycz
+            </a>
+
+            <span th:if="${!car.canBeRented()}" style="color:#888;">
+   ❌ Niedostępny
+</span>
+
+
+            <span th:if="${car.status != T(com.carrental.backend.model.CarStatus).AVAILABLE}">
+            —
+        </span>
+        </td>
+    <td>
+        <form th:if="${car.status != T(com.carrental.backend.model.CarStatus).RENTED}"
+              th:action="@{'/panel/cars/' + ${car.id} + '/archive'}"
+              method="post"
+              style="display:inline">
+            <button type="submit">📦 Archiwizuj</button>
+        </form>
+
+    </td>
+
+</tr>
+    <div th:if="${param.error}" style="background-color: #ffebee; color: #c62828; padding: 10px; margin: 10px 0; border-radius: 4px;">
+        <span th:if="${param.error[0] == 'missing_dates'}">⚠️ Musisz podać datę wypożyczenia i datę zwrotu!</span>
+        <span th:if="${param.error[0] == 'invalid_dates'}">⚠️ Data zwrotu nie może być wcześniejsza niż data wypożyczenia!</span>
+        <span th:if="${param.error[0] == 'missing_price'}">⚠️ Podaj cenę wypożyczenia!</span>
+        <span th:if="${param.error[0] == 'missing_price_long'}">Podaj cenę za miesiąc!</span>
+        <span th:if="${param.error[0] == 'car_unavailable'}">⚠️ Samochód jest niedostępny!</span>
+    </div>
+</table>
+<a href="/panel/cars/archived">📦 Przejdź do archiwum</a>
+<br><br>
+

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Szczegóły samochodu</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+        }
+        .ACTIVE {
+            background-color: #e6ffe6;
+        }
+        .FINISHED {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+
+<nav style="margin-bottom:15px;">
+    <a href="/panel/cars">🚗 Samochody</a> |
+    <a href="/panel/customers">👤 Klienci</a> |
+    <a href="/panel/rentals">📄 Wypożyczenia</a>
+</nav>
+
+<hr>
+
+<h1>🚗 Szczegóły samochodu</h1>
+
+<p><b>Marka:</b> <span th:text="${car.brand}"></span></p>
+<p><b>Model:</b> <span th:text="${car.model}"></span></p>
+<p><b>Rejestracja:</b> <span th:text="${car.plateNumber}"></span></p>
+<p><b>VIN:</b> <span th:text="${car.vin}"></span></p>
+<p><b>Status:</b> <span th:text="${car.status}"></span></p>
+
+<hr>
+
+<h2>📄 Aktualne wypożyczenie</h2>
+
+<div th:if="${#lists.isEmpty(rentals)}">
+    <p>Brak wypożyczeń dla tego samochodu.</p>
+</div>
+
+<div th:each="r : ${rentals}" th:if="${!r.returned}">
+    <p><b>Klient:</b>
+        <span th:text="${r.customer.firstName}"></span>
+        <span th:text="${r.customer.lastName}"></span>
+    </p>
+
+    <p><b>Rodzaj wynajmu:</b> <span th:text="${r.rentalType}"></span></p>
+
+    <p th:if="${r.rentalType.name() == 'SHORT_TERM'}">
+        <b>Cena za dobę:</b> <span th:text="${r.pricePerDay}"></span> zł
+    </p>
+
+    <p th:if="${r.rentalType.name() == 'LONG_TERM'}">
+        <b>Cena za miesiąc:</b> <span th:text="${r.pricePerMonth}"></span> zł<br>
+        <b>Dzień rozliczenia:</b> <span th:text="${r.billingDayOfMonth}"></span>
+    </p>
+
+    <p><b>Kaucja:</b> <span th:text="${r.deposit}"></span> zł</p>
+    <p><b>Przebieg początkowy:</b> <span th:text="${r.startMileage}"></span> km</p>
+    <p><b>Okres:</b>
+        <span th:text="${r.startDate}"></span>
+        –
+        <span th:text="${r.endDate != null ? r.endDate : 'bezterminowo'}"></span>
+    </p>
+</div>
+
+<hr>
+
+<h2>📜 Historia wypożyczeń</h2>
+
+<table>
+    <tr>
+        <th>Data wypożyczenia</th>
+        <th>Data zwrotu</th>
+        <th>Klient</th>
+        <th>Typ</th>
+        <th>Cena</th>
+        <th>Ilość</th>
+        <th>Wartość wypożyczenia</th>  <!-- NOWA KOLUMNA -->
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="r : ${rentals}">
+        <td th:text="${r.startDate}"></td>
+        <td th:text="${r.endDate} ?: '—'"></td>
+        <td th:text="${r.customer.firstName + ' ' + r.customer.lastName}"></td>
+        <td>
+            <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).SHORT_TERM}">Dobowy</span>
+            <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).LONG_TERM}">Miesięczny</span>
+        </td>
+        <td>
+        <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).SHORT_TERM}"
+              th:text="${r.pricePerDay} + ' zł/dzień'"></span>
+            <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).LONG_TERM}"
+                  th:text="${r.pricePerMonth} + ' zł/mc'"></span>
+        </td>
+        <td>
+        <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).SHORT_TERM}"
+              th:text="${r.days} + ' dób'"></span>
+            <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).LONG_TERM}"
+                  th:text="${r.months} + ' miesięcy'"></span>
+        </td>
+        <td>  <!-- NOWA KOMÓRKA -->
+            <strong style="color: green;"
+                    th:text="${#numbers.formatCurrency(r.totalPrice)}"></strong>
+        </td>
+        <td>
+            <span th:if="${r.returned}" style="color: green;">✅ Zwrócony</span>
+            <span th:if="${!r.returned}" style="color: orange;">🔄 Aktywny</span>
+        </td>
+</table>
+<a th:href="@{'/panel/cars/' + ${car.id} + '/service'}">
+    🛠 Książka serwisowa
+</a>
+<h3>📝 Notatki</h3>
+
+<form th:action="@{'/panel/cars/' + ${car.id} + '/notes'}" method="post">
+    <textarea name="content" required></textarea><br>
+    <button type="submit">➕ Dodaj notatkę</button>
+</form>
+
+<ul>
+    <li th:each="note : ${notes}">
+        <span th:text="${note.content}"></span>
+        <small th:text="${#temporals.format(note.createdAt, 'yyyy-MM-dd HH:mm')}"></small>
+
+        <form th:action="@{'/panel/cars/' + ${car.id} + '/notes/' + ${note.id} + '/delete'}"
+              method="post"
+              style="display:inline">
+            <button type="submit">🗑</button>
+        </form>
+    </li>
+</ul>
+
+<br>
+<a href="/panel/cars">⬅ Powrót do listy samochodów</a>
+
+</body>
+</html>

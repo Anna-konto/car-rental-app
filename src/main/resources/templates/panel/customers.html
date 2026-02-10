@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+  <meta charset="UTF-8">
+  <title>Klienci</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    th { background: #f4f4f4; }
+    a.button {
+      padding: 6px 10px;
+      background: #2c7be5;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+<nav style="margin-bottom:15px;">
+  <a href="/panel/cars">🚗 Samochody</a> |
+  <a href="/panel/customers">👤 Klienci</a> |
+  <a href="/panel/rentals">📄 Wypożyczenia</a>
+</nav>
+<hr>
+
+<h1>👤 Klienci</h1>
+
+<a href="/panel/customers/add" class="button">➕ Dodaj klienta</a>
+
+<br>
+<form method="get" th:action="@{/panel/customers}">
+  <label>
+    <input type="text"
+           name="lastName"
+           th:value="${lastName ?: ''}"
+           placeholder="Szukaj po nazwisku">
+  </label>
+  <button type="submit">🔍 Szukaj po nazwisku</button>
+  <a th:href="@{/panel/customers}">Wyczyść</a>
+</form>
+
+<hr>
+<p th:if="${#lists.isEmpty(customers)}">Brak klientów w bazie.</p>
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Imię</th>
+    <th>Nazwisko</th>
+    <th>Email</th>
+    <th>Telefon</th>
+    <th>Adres</th>
+    <th>Dowód</th>
+    <th>PESEL</th>
+    <th>Prawo jazdy</th>
+    <th>NIP</th>
+    <th>Szczegóły Edycja</th>
+    <th>Usuń</th>
+  </tr>
+  </thead>
+
+  <tbody>
+  <tr th:each="c : ${customers ?: '-'}">
+    <td th:text="${c.id}"></td>
+    <td th:text="${c.firstName}"></td>
+    <td>
+      <a th:href="@{'/panel/customers/' + ${c.id}}"
+         th:text="${c.lastName}"></a>
+    </td>
+
+    <td th:text="${c.email}"></td>
+    <td th:text="${c.phone}"></td>
+    <td th:text="${c.address}"></td>
+    <td th:text="${c.idCardNumber}"></td>
+    <td th:text="${c.pesel}"></td>
+    <td th:text="${c.drivingLicenseNumber ?: '-'}"></td>
+    <td th:text="${c.nip ?: '-'}"></td>
+    <td>
+      <a th:href="@{'/panel/customers/' + ${c.id}}">
+        👤 Szczegóły
+      </a>
+      <a th:href="@{'/panel/customers/' + ${c.id} + '/edit'}">
+
+        ✏️ Edytuj
+      </a>
+    </td>
+
+    <td>
+      <form th:action="@{'/panel/customers/' + ${c.id} + '/delete'}"
+            method="post"
+            onsubmit="return confirm('Na pewno usunąć klienta?');">
+        <button type="submit">🗑 Usuń</button>
+      </form>
+    </td>
+
+  </tr>
+  </tbody>
+</table>
+
+<br>
+<a href="/panel/cars">⬅ Powrót do samochodów</a>
+
+</body>
+</html>

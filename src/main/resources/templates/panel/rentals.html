@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Aktywne wypożyczenia</title>
+</head>
+<body>
+<nav style="margin-bottom:15px;">
+  <a href="/panel/cars">🚗 Samochody</a> |
+  <a href="/panel/customers">👤 Klienci</a> |
+  <a href="/panel/rentals">📄 Wypożyczenia</a>
+</nav>
+<hr>
+<h2>Aktywne wypożyczenia</h2>
+<!-- 🔍 Pole wyszukiwania -->
+<div class="search-box">
+  <form method="get" th:action="@{/panel/rentals}">
+    <label><strong>Wyszukaj po nazwisku klienta:</strong></label><br>
+    <input type="text"
+           name="search"
+           class="search-input"
+           placeholder="Wpisz nazwisko..."
+           th:value="${search}">
+    <button type="submit" class="search-btn">🔍 Szukaj</button>
+    <a th:href="@{/panel/rentals}" class="clear-btn">✖ Wyczyść</a>
+  </form>
+</div>
+<table border="1" cellpadding="6">
+  <thead>
+  <tr>
+    <th>Samochód</th>
+    <th>Rejestracja</th>
+    <th>
+      <a th:href="@{/panel/rentals(sortBy='customer.lastName', order=${order == 'asc' && sortBy == 'customer.lastName' ? 'desc' : 'asc'})}"
+         class="sort-link"
+         th:classappend="${sortBy == 'customer.lastName' ? (order == 'asc' ? 'sort-asc' : 'sort-desc') : ''}">
+        Klient
+      </a>
+    </th>
+    <th>
+      <a th:href="@{/panel/rentals(sortBy='startDate', order=${order == 'asc' && sortBy == 'startDate' ? 'desc' : 'asc'})}"
+         class="sort-link"
+         th:classappend="${sortBy == 'startDate' ? (order == 'asc' ? 'sort-asc' : 'sort-desc') : ''}">
+        Data wypożyczenia
+      </a>
+    </th>
+    <th>Data zwrotu</th>
+    <th>Typ</th>
+    <th>Cena</th>
+    <th>Ilość</th>
+    <th>Wartość</th>
+    <th>PDF</th>
+    <th>Akcja</th>
+  </tr>
+  </thead>
+  <tbody>  <!-- OTWARTY TBODY -->
+  <tr th:each="r : ${rentals}">
+    <td th:text="${r.car.brand + ' ' + r.car.model}"></td>
+    <td th:text="${r.car.plateNumber}"></td>
+    <td th:text="${r.customer.firstName + ' ' + r.customer.lastName}"></td>
+    <td th:text="${r.startDate}"></td>
+    <td th:text="${r.endDate} ?: '—'"></td>
+    <td>
+      <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).SHORT_TERM}">Dobowy</span>
+      <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).LONG_TERM}">Miesięczny</span>
+    </td>
+    <td>
+      <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).SHORT_TERM}"
+            th:text="${r.pricePerDay} + ' zł/dzień'"></span>
+      <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).LONG_TERM}"
+            th:text="${r.pricePerMonth} + ' zł/mc'"></span>
+    </td>
+    <td>
+      <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).SHORT_TERM}"
+            th:text="${r.days} + ' dób'"></span>
+      <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).LONG_TERM}"
+            th:text="${r.months} + ' miesięcy'"></span>
+    </td>
+    <td>
+      <strong style="color: green;"
+              th:text="${#numbers.formatCurrency(r.totalPrice)}"></strong>
+    </td>
+    <td>
+      <a th:href="@{'/panel/rentals/' + ${r.id} + '/contract/pdf'}"
+         target="_blank">📄 PDF</a>
+    </td>
+    <td>
+      <form th:if="${!r.returned}"
+            th:action="@{'/panel/rentals/' + ${r.id} + '/return'}"
+            method="post">
+        <button type="submit">🔄 Zwróć auto</button>
+      </form>
+    </td>
+  </tr>
+  </tbody>  <!-- ✅ DODANO ZAMKNIĘCIE TBODY -->
+</table>  <!-- ✅ PRZENIESIONO POZA TBODY -->
+
+<br>
+<a href="/panel/cars">⬅ Powrót do aut</a>
+</body>
+</html>

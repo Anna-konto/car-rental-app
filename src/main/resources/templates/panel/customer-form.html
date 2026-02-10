@@ -1,0 +1,43 @@
+<form th:action="@{/panel/customers/add}"
+      th:object="${customer}"
+      method="post">
+
+  <input type="hidden" th:field="*{id}"/>
+
+  <label>Imię:</label>
+  <input type="text" th:field="*{firstName}" required><br>
+
+  <label>Nazwisko:</label>
+  <input type="text" th:field="*{lastName}" required><br>
+
+  <label>Email:</label>
+  <input type="email" th:field="*{email}" required><br>
+
+  <label>Telefon:</label>
+  <input type="text" th:field="*{phone}" required><br><br>
+  <label>Adres zamieszkania:</label><br>
+  <textarea th:field="*{address}" rows="2" required></textarea><br><br>
+
+  <label>Numer dowodu osobistego:</label><br>
+  <input type="text" th:field="*{idCardNumber}" required><br><br>
+  <label>PESEL:</label><br>
+  <input type="text"
+         th:field="*{pesel}"
+         maxlength="11"
+         pattern="[0-9]{11}"
+         required>
+  <br><br>
+
+  <label>Numer prawa jazdy (opcjonalnie):</label><br>
+  <input type="text" th:field="*{drivingLicenseNumber}"><br><br>
+
+  <label for="nip">NIP (opcjonalnie):</label>
+  <input type="text"
+         id="nip"
+         name="nip"
+         th:field="*{nip}"
+         placeholder="123-456-78-90">
+  <small>tylko dla firm</small>
+
+  <button type="submit">💾 Zapisz</button>
+</form>

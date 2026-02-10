@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Szczegóły klienta</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+        }
+        .ACTIVE {
+            background-color: #e6ffe6;
+        }
+        .FINISHED {
+            background-color: #f4f4f4;
+        }
+        nav a {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<nav style="margin-bottom:15px;">
+    <a href="/panel/cars">🚗 Samochody</a>
+    <a href="/panel/customers">👤 Klienci</a>
+    <a href="/panel/rentals">📄 Wypożyczenia</a>
+</nav>
+
+<hr>
+
+<h1>👤 Szczegóły klienta</h1>
+
+<p><b>Imię:</b> <span th:text="${customer.firstName}"></span></p>
+<p><b>Nazwisko:</b> <span th:text="${customer.lastName}"></span></p>
+<p><b>Email:</b> <span th:text="${customer.email}"></span></p>
+<p><b>Telefon:</b> <span th:text="${customer.phone}"></span></p>
+<p><b>Adres:</b> <span th:text="${customer.address}"></span></p>
+<p><b>Dowód osobisty:</b> <span th:text="${customer.idCardNumber}"></span></p>
+<p><b>Pesel:</b> <span th:text="${customer.pesel}"></span></p>
+<p><b>Prawo jazdy:</b>
+    <span th:text="${customer.drivingLicenseNumber != null && !customer.drivingLicenseNumber.isBlank()
+        ? customer.drivingLicenseNumber : 'brak'}"></span>
+</p>
+<p><b>NIP:</b> <span th:text="${customer.nip != null && !customer.nip.isBlank() ? customer.nip : '—'}"></span></p>
+
+<hr>
+
+<h2>📜 Wypożyczenia klienta</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>Samochód</th>
+        <th>Rejestracja</th>
+        <th>Od</th>
+        <th>Do</th>
+        <th>Typ wynajmu</th>
+        <th>Cena jednostkowa</th>
+        <th>Czas wynajmu</th>
+        <th>Łączna kwota</th>
+        <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr th:each="r : ${rentals}"
+        th:class="${r.returned ? 'FINISHED' : 'ACTIVE'}">
+        <td th:text="${r.car.brand + ' ' + r.car.model}"></td>
+        <td th:text="${r.car.plateNumber}"></td>
+        <td th:text="${r.startDate}"></td>
+        <td th:text="${r.endDate != null ? r.endDate : '—'}"></td>
+        <td>
+            <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).SHORT_TERM}">Dobowy</span>
+            <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).LONG_TERM}">Miesięczny</span>
+        </td>
+        <td>
+            <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).SHORT_TERM}"
+                  th:text="${r.pricePerDay} + ' zł/dzień'"></span>
+            <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).LONG_TERM}"
+                  th:text="${r.pricePerMonth} + ' zł/mc'"></span>
+        </td>
+        <td>
+            <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).SHORT_TERM}"
+                  th:text="${r.days} + ' dób'"></span>
+            <span th:if="${r.rentalType == T(com.carrental.backend.model.RentalType).LONG_TERM}"
+                  th:text="${r.months} + ' miesięcy'"></span>
+        </td>
+        <td>
+            <strong style="color: green;" th:text="${#numbers.formatCurrency(r.totalPrice)}"></strong>
+        </td>
+        <td>
+            <span th:if="${r.returned}" style="color: green;">✅ Zwrócony</span>
+            <span th:if="${!r.returned}" style="color: orange;">🔄 Aktywny</span>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<br>
+<a href="/panel/customers">⬅ Powrót do listy klientów</a>
+
+</body>
+</html>

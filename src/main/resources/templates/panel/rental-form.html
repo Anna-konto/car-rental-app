@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Wypożyczenie samochodu</title>
+  <style>
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select {
+      margin-bottom: 10px;
+      padding: 5px;
+    }
+    .price-section {
+      margin: 15px 0;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<nav style="margin-bottom:15px;">
+  <a href="/panel/cars">🚗 Samochody</a> |
+  <a href="/panel/customers">👤 Klienci</a> |
+  <a href="/panel/rentals">📄 Wypożyczenia</a>
+</nav>
+
+<hr>
+
+<h1>📄 Wypożycz samochód</h1>
+
+<!-- 🔒 zabezpieczenie: jeśli car == null, formularz się nie renderuje -->
+<div th:if="${car == null}">
+  <p style="color:red;">
+    ❌ Błąd: nie wybrano samochodu
+  </p>
+  <a href="/panel/cars">⬅ Wróć do listy samochodów</a>
+</div>
+
+<!-- ✅ GŁÓWNY FORMULARZ -->
+<div th:if="${car != null}">
+
+  <h3>🚗 Samochód</h3>
+  <ul>
+    <li><b>Marka:</b> <span th:text="${car.brand}"></span></li>
+    <li><b>Model:</b> <span th:text="${car.model}"></span></li>
+    <li><b>Rejestracja:</b> <span th:text="${car.plateNumber}"></span></li>
+    <li><b>VIN:</b> <span th:text="${car.vin}"></span></li>
+  </ul>
+
+  <hr>
+
+  <form method="post" th:action="@{/panel/rentals/add}">
+
+    <!-- 🔑 ID SAMOCHODU (UKRYTE) -->
+    <input type="hidden" name="carId" th:value="${car.id}" />
+
+    <!-- 👤 KLIENT -->
+    <label>Klient:</label><br>
+    <select name="customerId" required>
+      <option value="">-- wybierz klienta --</option>
+      <option th:each="c : ${customers}"
+              th:value="${c.id}"
+              th:text="${c.firstName + ' ' + c.lastName}">
+      </option>
+    </select>
+
+    <br><br>
+
+    <!-- 📄 TYP WYNAJMU -->
+    <label>Rodzaj wynajmu:</label><br>
+    <select name="rentalType" id="rentalType" required>
+      <option value="SHORT_TERM">Krótkoterminowy</option>
+      <option value="LONG_TERM">Długoterminowy</option>
+    </select>
+
+    <br><br>
+
+    <label>Godzina odbioru</label>
+    <input type="time" name="startTime" required>
+
+    <label>Godzina zwrotu</label>
+    <input type="time" name="endTime" required>
+
+    <br><br>
+
+    <h3>🚗 Dane samochodu</h3>
+
+    <p><b>Marka:</b> <span th:text="${car.brand}"></span></p>
+    <p><b>Model:</b> <span th:text="${car.model}"></span></p>
+    <p><b>VIN:</b> <span th:text="${car.vin}"></span></p>
+    <p><b>Rejestracja:</b> <span th:text="${car.plateNumber}"></span></p>
+
+    <label>Przebieg początkowy</label>
+    <input type="number" name="startMileage" required>
+
+    <br><br>
+
+    <h3>📄 Parametry umowy</h3>
+
+    <!-- KRÓTKOTERMINOWY -->
+    <div id="shortTerm" class="price-section">
+      <label>Cena za dobę (zł)</label>
+      <input type="number" step="0.01" name="pricePerDay" required>
+    </div>
+
+    <!-- DŁUGOTERMINOWY -->
+    <div id="longTerm" class="price-section" style="display:none;">
+      <label>Cena za miesiąc (zł)</label>
+      <input type="number" step="0.01" name="pricePerMonth" required>
+
+      <label>Dzień rozliczenia miesiąca (1-31)</label>
+      <input type="number" min="1" max="31" name="billingDayOfMonth" value="1" required>
+    </div>
+
+
+    <label>Kaucja (zł)</label>
+    <input type="number" step="0.01" name="deposit" required>
+
+    <label>Data od</label>
+    <input type="date" name="startDate" required>
+
+    <label>Data do</label>
+    <input type="date" name="endDate" required>
+
+    <br><br>
+
+    <button type="submit">✅ Zapisz wypożyczenie</button>
+    <a href="/panel/cars" style="margin-left: 10px;">⬅ Anuluj</a>
+  </form>
+
+</div>
+
+<script>
+  const rentalTypeSelect = document.getElementById('rentalType');
+  const shortTerm = document.getElementById('shortTerm');
+  const longTerm = document.getElementById('longTerm');
+
+  const pricePerDay = document.querySelector('input[name="pricePerDay"]');
+  const pricePerMonth = document.querySelector('input[name="pricePerMonth"]');
+  const billingDayOfMonth = document.querySelector('input[name="billingDayOfMonth"]');
+
+  function updateVisibility() {
+    if (rentalTypeSelect.value === 'SHORT_TERM') {
+      shortTerm.style.display = 'block';
+      longTerm.style.display = 'none';
+
+      // Wyłącz ukryte pola (przeglądarka nie będzie ich walidować)
+      pricePerMonth.disabled = true;
+      billingDayOfMonth.disabled = true;
+
+      // Włącz widoczne pola
+      pricePerDay.disabled = false;
+    } else {
+      shortTerm.style.display = 'none';
+      longTerm.style.display = 'block';
+
+      // Wyłącz ukryte pola
+      pricePerDay.disabled = true;
+
+      // Włącz widoczne pola
+      pricePerMonth.disabled = false;
+      billingDayOfMonth.disabled = false;
+    }
+  }
+
+  // Nasłuchiwanie zmiany typu wypożyczenia
+  rentalTypeSelect.addEventListener('change', updateVisibility);
+
+  // Inicjalizacja przy załadowaniu
+  updateVisibility();
+</script>
+</body>
+</html>

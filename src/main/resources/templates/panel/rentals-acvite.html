@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Aktywne wypożyczenia</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+    }
+    .ACTIVE {
+      background-color: #e6ffe6;
+    }
+    nav {
+      margin-bottom: 15px;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/panel/cars">🚗 Samochody</a> |
+  <a href="/panel/customers">👤 Klienci</a> |
+  <a href="/panel/rentals">📄 Wypożyczenia</a>
+</nav>
+
+<hr>
+
+<h1>🚗 Aktualnie wypożyczone samochody</h1>
+
+<table>
+  <thead>
+  <tr>
+    <th>Klient</th>
+    <th>Samochód</th>
+    <th>Rejestracja</th>
+    <th>Data wypożyczenia</th>
+    <th>Akcja</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="r : ${rentals}" class="ACTIVE">
+    <td>
+      <a th:href="@{'/panel/customers/' + ${r.customer.id}}">
+        <span th:text="${r.customer.firstName + ' ' + r.customer.lastName}"></span>
+      </a>
+    </td>
+    <td th:text="${r.car.brand + ' ' + r.car.model}"></td>
+    <td th:text="${r.car.plateNumber}"></td>
+    <td th:text="${#temporals.format(r.rentalDate, 'yyyy-MM-dd HH:mm')}"></td>
+    <td>
+      <form th:action="@{'/panel/rentals/' + ${r.id} + '/return'}" method="post">
+        <button type="submit">🔄 Zwróć</button>
+      </form>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<br>
+<a href="/panel/cars">⬅ Powrót do panelu</a>
+
+</body>
+</html>
