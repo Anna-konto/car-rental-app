@@ -275,4 +275,8 @@ CarNote note = new CarNote();
         carRepository.save(car);
         return "redirect:/panel/cars/" + id;
     }
+    @GetMapping("/login")
+    public String login() {
+        return "login";  // Zwraca widok login.html
+    }
 }
