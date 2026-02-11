@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "car_service_entries")
 public class CarServiceEntry {
 
     @Id
@@ -11,10 +12,10 @@ public class CarServiceEntry {
     private Long id;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "car_id")
     private Car car;
 
     private LocalDate serviceDate;
-
     private String type; // np. OLEJ, NAPRAWA, SERWIS, INNE
 
     @Column(length = 2000)

@@ -7,10 +7,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.carrental.backend.model.CarStatus;
+import com.carrental.backend.model.CarServiceEntry;
 import java.util.List;
 import com.carrental.backend.model.CarNote;
 import com.carrental.backend.repository.CarNoteRepository;
-import com.carrental.backend.model.CarServiceEntry;
+import com.carrental.backend.service.CarService;
 import com.carrental.backend.repository.CarServiceEntryRepository;
 import java.time.LocalDate;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,17 +26,20 @@ public class PanelCarController {
     private final RentalRepository rentalRepository;
     private final CarNoteRepository carNoteRepository;
     private final CarServiceEntryRepository carServiceEntryRepository;
+    private final CarService carService;
 
     public PanelCarController(
             CarRepository carRepository,
             RentalRepository rentalRepository,
             CarNoteRepository carNoteRepository,
-            CarServiceEntryRepository carServiceEntryRepository
+            CarServiceEntryRepository carServiceEntryRepository,
+            CarService carService
     ) {
         this.carRepository = carRepository;
         this.rentalRepository = rentalRepository;
         this.carNoteRepository = carNoteRepository;
         this.carServiceEntryRepository = carServiceEntryRepository;
+        this.carService = carService;
 
     }
 
@@ -206,7 +210,8 @@ CarNote note = new CarNote();
                 serviceDate != null ? serviceDate : LocalDate.now()
         );
 
-        carServiceEntryRepository.save(entry);
+        CarServiceEntry savedEntry;
+        savedEntry = carServiceEntryRepository.save(entry);
 
         return "redirect:/panel/cars/" + id + "/service";
     }
@@ -228,5 +233,46 @@ CarNote note = new CarNote();
         return "panel/car-form";
     }
 
+    // 📝 Formularz edycji samochodu
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        Car car = carRepository.findById(id).orElse(null);
+        if (car == null) {
+            return "redirect:/panel/cars";
+        }
+        model.addAttribute("car", car);
+        return "panel/edit-car";
+    }
 
+    // ✅ Zapisz zmiany
+    @PostMapping("/{id}")
+    public String updateCar(
+            @PathVariable Long id,
+            @RequestParam String brand,
+            @RequestParam String carModel,
+            @RequestParam Integer year,
+            @RequestParam String plateNumber,
+            @RequestParam(required = false) String vin,
+            @RequestParam(required = false) LocalDate technicalInspectionValidUntil,
+            @RequestParam(required = false) LocalDate insuranceValidUntil,
+            @RequestParam String status,
+            Model model
+    ) {
+        Car car = carRepository.findById(id).orElse(null);
+        if (car == null) {
+            return "redirect:/panel/cars";
+        }
+
+        car.setBrand(brand);
+        car.setModel(carModel);
+        car.setYear(year);
+        car.setPlateNumber(plateNumber);
+        if (vin != null) car.setVin(vin);
+        car.setTechnicalInspectionValidUntil(technicalInspectionValidUntil);
+        car.setInsuranceValidUntil(insuranceValidUntil);
+        car.setStatus(CarStatus.valueOf(status));
+
+        carRepository.save(car);
+        return "redirect:/panel/cars/" + id;
+    }
 }

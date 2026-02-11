@@ -120,6 +120,12 @@
 <a th:href="@{'/panel/cars/' + ${car.id} + '/service'}">
     🛠 Książka serwisowa
 </a>
+<div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+    <a th:href="@{/panel/cars/__${car.id}__/edit}"
+       style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px;">
+        ✏️ Edytuj samochód
+    </a>
+</div>
 <h3>📝 Notatki</h3>
 
 <form th:action="@{'/panel/cars/' + ${car.id} + '/notes'}" method="post">

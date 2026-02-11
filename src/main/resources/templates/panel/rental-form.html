@@ -173,5 +173,26 @@
   // Inicjalizacja przy załadowaniu
   updateVisibility();
 </script>
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+  // Inicjalizacja date picker dla pola daty wypożyczenia
+  flatpickr("#rentalDate", {
+      dateFormat: "d.m.Y",  // Format: dzień.miesiąc.rok
+      locale: "pl",         // Polski język
+      allowInput: true      // Pozwól na ręczne wpisywanie
+  });
+
+  // Inicjalizacja date picker dla pola daty zwrotu
+  flatpickr("#returnDate", {
+      dateFormat: "d.m.Y",
+      locale: "pl",
+      allowInput: true
+  });
+</script>
 </body>
 </html>

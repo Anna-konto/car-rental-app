@@ -1,21 +1,26 @@
 package com.carrental.backend.controller;
 
-import com.carrental.backend.model.Car;
-import com.carrental.backend.repository.CarRepository;
-import org.springframework.web.bind.annotation.*;
 import com.carrental.backend.dto.CarDto;
 import com.carrental.backend.mapper.CarMapper;
-import java.time.LocalDate;
-import java.util.List;
+import com.carrental.backend.model.Car;
 import com.carrental.backend.model.CarStatus;
+import com.carrental.backend.model.CarServiceEntry;
+import com.carrental.backend.repository.CarRepository;
+import com.carrental.backend.service.CarService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
 
-
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/cars")
 public class CarController {
-
+    @Autowired
+    private CarService carService;
     private final CarRepository carRepository;
 
     public CarController(CarRepository carRepository) {
@@ -43,6 +48,7 @@ public class CarController {
         return carRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Car not found"));
     }
+
     @GetMapping("/insurance-expired")
     public List<CarDto> getCarsWithExpiredInsurance() {
         return carRepository
@@ -51,6 +57,7 @@ public class CarController {
                 .map(CarMapper::toDto)
                 .toList();
     }
+
     @GetMapping("/inspection-expired")
     public List<CarDto> getCarsWithExpiredInspection() {
         return carRepository
@@ -61,22 +68,8 @@ public class CarController {
     }
 
     // ✅ UPDATE
-    @PutMapping("/{id}")
-    public Car updateCar(
-            @PathVariable Long id,
-            @RequestBody Car updatedCar) {
 
-        Car car = carRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Car not found"));
 
-        car.setBrand(updatedCar.getBrand());
-        car.setModel(updatedCar.getModel());
-        car.setYear(updatedCar.getYear());
-        car.setPlateNumber(updatedCar.getPlateNumber());
-        car.setAvailable(updatedCar.isAvailable());
-
-        return carRepository.save(car);
-    }
     @PutMapping("/{id}/status")
     public CarDto changeCarStatus(
             @PathVariable Long id,
@@ -89,11 +82,49 @@ public class CarController {
         car.updateStatus();
         return CarMapper.toDto(carRepository.save(car));
 
-            }
+    }
 
     // ✅ DELETE
     @DeleteMapping("/{id}")
     public void deleteCar(@PathVariable Long id) {
         carRepository.deleteById(id);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Car> editCar(
+            @PathVariable Long id,
+            @RequestBody Car carDetails) {
+        Car car = carService.findById(id);
+        if (car == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        car.setBrand(carDetails.getBrand());
+        car.setModel(carDetails.getModel());
+        car.setYear(carDetails.getYear());
+        car.setPlateNumber(carDetails.getPlateNumber());
+        car.setVin(carDetails.getVin());
+        car.setTechnicalInspectionValidUntil(carDetails.getTechnicalInspectionValidUntil());
+        car.setInsuranceValidUntil(carDetails.getInsuranceValidUntil());
+        car.setStatus(carDetails.getStatus());
+
+        Car updatedCar = carService.save(car);
+        return ResponseEntity.ok(updatedCar);
+    }
+
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        Car car = carService.findById(id);
+        if (car == null) {
+            return "redirect:/cars";
+        }
+        model.addAttribute("car", car);
+        return "panel/edit-car";
+    }
+    @GetMapping("/test")
+    public String test(Model model) {
+        model.addAttribute("message", "Hello from Thymeleaf!");
+        return "panel/test";
+    }
 }
+
